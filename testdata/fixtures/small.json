@@ -1,0 +1,791 @@
+{
+  "profile": {
+    "Name": "small",
+    "Tenants": 2,
+    "ProductsPerTenant": 20,
+    "CustomersPerTenant": 10,
+    "PromotionsPerTenant": 10,
+    "OverlapPct": 0
+  },
+  "tenant_ids": [
+    "tenant-a",
+    "tenant-b"
+  ],
+  "products": [
+    {
+      "id": "prod-tenant-a-00001",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00001",
+      "name": "Product tenant-a 1",
+      "list_jpy": 1305,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00002",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00002",
+      "name": "Product tenant-a 2",
+      "list_jpy": 4668,
+      "category": "service"
+    },
+    {
+      "id": "prod-tenant-a-00003",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00003",
+      "name": "Product tenant-a 3",
+      "list_jpy": 5423,
+      "category": "consumable"
+    },
+    {
+      "id": "prod-tenant-a-00004",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00004",
+      "name": "Product tenant-a 4",
+      "list_jpy": 1357,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-a-00005",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00005",
+      "name": "Product tenant-a 5",
+      "list_jpy": 1128,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00006",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00006",
+      "name": "Product tenant-a 6",
+      "list_jpy": 9929,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00007",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00007",
+      "name": "Product tenant-a 7",
+      "list_jpy": 8815,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-a-00008",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00008",
+      "name": "Product tenant-a 8",
+      "list_jpy": 2652,
+      "category": "consumable"
+    },
+    {
+      "id": "prod-tenant-a-00009",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00009",
+      "name": "Product tenant-a 9",
+      "list_jpy": 2052,
+      "category": "consumable"
+    },
+    {
+      "id": "prod-tenant-a-00010",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00010",
+      "name": "Product tenant-a 10",
+      "list_jpy": 5535,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-a-00011",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00011",
+      "name": "Product tenant-a 11",
+      "list_jpy": 7082,
+      "category": "service"
+    },
+    {
+      "id": "prod-tenant-a-00012",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00012",
+      "name": "Product tenant-a 12",
+      "list_jpy": 8444,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00013",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00013",
+      "name": "Product tenant-a 13",
+      "list_jpy": 4544,
+      "category": "consumable"
+    },
+    {
+      "id": "prod-tenant-a-00014",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00014",
+      "name": "Product tenant-a 14",
+      "list_jpy": 4002,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00015",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00015",
+      "name": "Product tenant-a 15",
+      "list_jpy": 2507,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00016",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00016",
+      "name": "Product tenant-a 16",
+      "list_jpy": 9982,
+      "category": "service"
+    },
+    {
+      "id": "prod-tenant-a-00017",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00017",
+      "name": "Product tenant-a 17",
+      "list_jpy": 7115,
+      "category": "service"
+    },
+    {
+      "id": "prod-tenant-a-00018",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00018",
+      "name": "Product tenant-a 18",
+      "list_jpy": 1629,
+      "category": "service"
+    },
+    {
+      "id": "prod-tenant-a-00019",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00019",
+      "name": "Product tenant-a 19",
+      "list_jpy": 8974,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-a-00020",
+      "tenant_id": "tenant-a",
+      "sku": "SKU-tenant-a-00020",
+      "name": "Product tenant-a 20",
+      "list_jpy": 5572,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00021",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00021",
+      "name": "Product tenant-b 21",
+      "list_jpy": 5235,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00022",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00022",
+      "name": "Product tenant-b 22",
+      "list_jpy": 1824,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00023",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00023",
+      "name": "Product tenant-b 23",
+      "list_jpy": 4536,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00024",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00024",
+      "name": "Product tenant-b 24",
+      "list_jpy": 8194,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00025",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00025",
+      "name": "Product tenant-b 25",
+      "list_jpy": 1429,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00026",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00026",
+      "name": "Product tenant-b 26",
+      "list_jpy": 2978,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00027",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00027",
+      "name": "Product tenant-b 27",
+      "list_jpy": 8109,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00028",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00028",
+      "name": "Product tenant-b 28",
+      "list_jpy": 9072,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00029",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00029",
+      "name": "Product tenant-b 29",
+      "list_jpy": 8938,
+      "category": "consumable"
+    },
+    {
+      "id": "prod-tenant-b-00030",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00030",
+      "name": "Product tenant-b 30",
+      "list_jpy": 1786,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00031",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00031",
+      "name": "Product tenant-b 31",
+      "list_jpy": 8504,
+      "category": "service"
+    },
+    {
+      "id": "prod-tenant-b-00032",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00032",
+      "name": "Product tenant-b 32",
+      "list_jpy": 7411,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00033",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00033",
+      "name": "Product tenant-b 33",
+      "list_jpy": 4015,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00034",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00034",
+      "name": "Product tenant-b 34",
+      "list_jpy": 5496,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00035",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00035",
+      "name": "Product tenant-b 35",
+      "list_jpy": 3116,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00036",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00036",
+      "name": "Product tenant-b 36",
+      "list_jpy": 9566,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00037",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00037",
+      "name": "Product tenant-b 37",
+      "list_jpy": 7870,
+      "category": "subscription"
+    },
+    {
+      "id": "prod-tenant-b-00038",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00038",
+      "name": "Product tenant-b 38",
+      "list_jpy": 4880,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00039",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00039",
+      "name": "Product tenant-b 39",
+      "list_jpy": 1101,
+      "category": "hardware"
+    },
+    {
+      "id": "prod-tenant-b-00040",
+      "tenant_id": "tenant-b",
+      "sku": "SKU-tenant-b-00040",
+      "name": "Product tenant-b 40",
+      "list_jpy": 4303,
+      "category": "service"
+    }
+  ],
+  "customers": [
+    {
+      "id": "cust-tenant-a-00001",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 1",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-a-00002",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 2",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-a-00003",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 3",
+      "segment": "premium"
+    },
+    {
+      "id": "cust-tenant-a-00004",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 4",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-a-00005",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 5",
+      "segment": "enterprise"
+    },
+    {
+      "id": "cust-tenant-a-00006",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 6",
+      "segment": "enterprise"
+    },
+    {
+      "id": "cust-tenant-a-00007",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 7",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-a-00008",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 8",
+      "segment": "enterprise"
+    },
+    {
+      "id": "cust-tenant-a-00009",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 9",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-a-00010",
+      "tenant_id": "tenant-a",
+      "name": "Customer tenant-a 10",
+      "segment": "enterprise"
+    },
+    {
+      "id": "cust-tenant-b-00011",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 11",
+      "segment": "enterprise"
+    },
+    {
+      "id": "cust-tenant-b-00012",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 12",
+      "segment": "enterprise"
+    },
+    {
+      "id": "cust-tenant-b-00013",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 13",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-b-00014",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 14",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-b-00015",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 15",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-b-00016",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 16",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-b-00017",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 17",
+      "segment": "standard"
+    },
+    {
+      "id": "cust-tenant-b-00018",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 18",
+      "segment": "internal"
+    },
+    {
+      "id": "cust-tenant-b-00019",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 19",
+      "segment": "standard"
+    },
+    {
+      "id": "cust-tenant-b-00020",
+      "tenant_id": "tenant-b",
+      "name": "Customer tenant-b 20",
+      "segment": "enterprise"
+    }
+  ],
+  "promotions": [
+    {
+      "id": "prom-tenant-a-00001",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 1",
+      "channel": "wholesale",
+      "product_scope": "wildcard",
+      "priority": 9,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 198,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00002",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 2",
+      "channel": "partner",
+      "product_scope": "wildcard",
+      "priority": 1,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 468,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00003",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 3",
+      "channel": "wholesale",
+      "product_id": "prod-tenant-a-00020",
+      "product_scope": "sku",
+      "priority": 9,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 143,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00004",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 4",
+      "channel": "api",
+      "product_scope": "wildcard",
+      "priority": 3,
+      "stacking": true,
+      "exclusion": false,
+      "percent_bp": 748,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00005",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 5",
+      "channel": "web",
+      "product_scope": "wildcard",
+      "priority": 5,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 434,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00006",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 6",
+      "channel": "store",
+      "product_id": "prod-tenant-a-00015",
+      "product_scope": "sku",
+      "priority": 5,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 1499,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00007",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 7",
+      "channel": "web",
+      "product_id": "prod-tenant-a-00020",
+      "product_scope": "sku",
+      "priority": 6,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 363,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00008",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 8",
+      "channel": "wholesale",
+      "product_scope": "wildcard",
+      "priority": 4,
+      "stacking": true,
+      "exclusion": false,
+      "percent_bp": 487,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00009",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 9",
+      "channel": "api",
+      "product_scope": "wildcard",
+      "priority": 8,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 906,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-a-00010",
+      "tenant_id": "tenant-a",
+      "name": "Promotion tenant-a 10",
+      "channel": "api",
+      "product_scope": "wildcard",
+      "priority": 4,
+      "stacking": true,
+      "exclusion": false,
+      "percent_bp": 671,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00011",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 11",
+      "channel": "store",
+      "product_scope": "wildcard",
+      "priority": 7,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 149,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00012",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 12",
+      "channel": "api",
+      "product_id": "prod-tenant-b-1000019",
+      "product_scope": "sku",
+      "priority": 4,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 1037,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00013",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 13",
+      "channel": "api",
+      "product_scope": "wildcard",
+      "priority": 7,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 169,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00014",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 14",
+      "channel": "api",
+      "product_id": "prod-tenant-b-1000001",
+      "product_scope": "sku",
+      "priority": 7,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 1093,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00015",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 15",
+      "channel": "partner",
+      "product_id": "prod-tenant-b-1000018",
+      "product_scope": "sku",
+      "priority": 1,
+      "stacking": true,
+      "exclusion": false,
+      "percent_bp": 1217,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00016",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 16",
+      "channel": "store",
+      "product_scope": "wildcard",
+      "priority": 7,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 1323,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00017",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 17",
+      "channel": "api",
+      "product_id": "prod-tenant-b-1000017",
+      "product_scope": "sku",
+      "priority": 6,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 1280,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00018",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 18",
+      "channel": "api",
+      "product_id": "prod-tenant-b-1000018",
+      "product_scope": "sku",
+      "priority": 8,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 201,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00019",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 19",
+      "channel": "web",
+      "product_id": "prod-tenant-b-1000008",
+      "product_scope": "sku",
+      "priority": 5,
+      "stacking": false,
+      "exclusion": false,
+      "percent_bp": 824,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    },
+    {
+      "id": "prom-tenant-b-00020",
+      "tenant_id": "tenant-b",
+      "name": "Promotion tenant-b 20",
+      "channel": "web",
+      "product_scope": "wildcard",
+      "priority": 6,
+      "stacking": true,
+      "exclusion": false,
+      "percent_bp": 1297,
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-12-31T23:59:59Z"
+    }
+  ],
+  "conditions": [
+    {
+      "id": "cond-00001",
+      "promotion_id": "prom-tenant-a-00001",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00002",
+      "promotion_id": "prom-tenant-a-00002",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00003",
+      "promotion_id": "prom-tenant-a-00009",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00004",
+      "promotion_id": "prom-tenant-a-00010",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00005",
+      "promotion_id": "prom-tenant-b-00014",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00006",
+      "promotion_id": "prom-tenant-b-00015",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00007",
+      "promotion_id": "prom-tenant-b-00016",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00008",
+      "promotion_id": "prom-tenant-b-00017",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00009",
+      "promotion_id": "prom-tenant-b-00018",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    },
+    {
+      "id": "cond-00010",
+      "promotion_id": "prom-tenant-b-00019",
+      "kind": "quantity",
+      "expr": "quantity \u003e= 1"
+    }
+  ]
+}

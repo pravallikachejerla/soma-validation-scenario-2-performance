@@ -1,0 +1,45 @@
+# Sandbox manifest for the SOMA Genesis deployment environment.
+# This file is read by the sandbox to provision the baseline and
+# candidate deployments side by side.
+apiVersion: soma.dev/v1
+kind: SandboxDeployment
+metadata:
+  name: scenario-2-pricing
+  labels:
+    scenario: pricing-perf
+spec:
+  baseline:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    env:
+      APP_MODE: postgres
+      BUILD_COMMIT: dev
+    ports:
+      - 8080
+      - 5432
+      - 5173
+    datasets:
+      - profile: medium
+        seed_sha256: ed38e6b32759c01c9618102711bb240521c20e790080a66599000864ed2e46cc
+  candidate:
+    depends_on: [baseline]
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    env:
+      APP_MODE: postgres
+      BUILD_COMMIT: candidate
+    ports:
+      - 8081
+  evidence:
+    metrics:
+      - pricing_query_count
+      - pricing_compile_count
+      - pricing_evaluate_duration_seconds
+      - pricing_cache_hits_total
+      - pricing_candidate_count
+    healthcheck_path: /healthz
+  rollback:
+    strategy: docker-tag
+    tag: scenario-2-pricing-baseline
