@@ -22,10 +22,7 @@ import (
 )
 
 func main() {
-	mode := getenv("APP_MODE", "memory")
-	addr := getenv("APP_ADDR", ":8080")
 
-	reg := prometheus.NewRegistry()
 	m := observability.NewMetrics(reg)
 	mem := storage.NewMemoryStore()
 	pcache := cache.New(1024, 5*time.Minute)
