@@ -1,6 +1,7 @@
 # Sandbox manifest for the SOMA Genesis deployment environment.
 # This file is read by the sandbox to provision the baseline and
 # candidate deployments side by side.
+
 apiVersion: soma.dev/v1
 kind: SandboxDeployment
 metadata:
@@ -43,3 +44,6 @@ spec:
   rollback:
     strategy: docker-tag
     tag: scenario-2-pricing-baseline
+
+# Note: Baseline and candidate are identical in this repo (commit 70b7e68). No performance delta expected.
+# Deployments use same dataset, same workload definition from benchmarks/runner.go.
