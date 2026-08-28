@@ -22,13 +22,13 @@ import (
 )
 
 func main() {
-	reg := prometheus.NewRegistry()
 	mode := getenv("APP_MODE", "memory")
 	addr := getenv("APP_ADDR", ":8080")
 
+	reg := prometheus.NewRegistry()
 	m := observability.NewMetrics(reg)
 	mem := storage.NewMemoryStore()
-	pcache := cache.New(10000, 5*time.Minute) // candidate: larger cache for medium profile
+	pcache := cache.New(1024, 5*time.Minute)
 	identity := application.BuildIdentity{
 		Commit:    getenv("BUILD_COMMIT", "dev"),
 		BuiltAt:   getenv("BUILD_BUILT_AT", time.Now().UTC().Format(time.RFC3339)),
@@ -42,7 +42,7 @@ func main() {
 			log.Fatalf("open db: %v", err)
 		}
 		// register driver
-		_ = stdlib.GetDefaultDriver()
+		_ = stdlib.GetDefaultDriver
 		if err := db.Ping(); err != nil {
 			log.Printf("postgres unavailable, falling back to memory: %v", err)
 		} else {

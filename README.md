@@ -2,6 +2,8 @@
 
 A working enterprise pricing application that supports interactive
 quote simulation, batch pricing, promotion management and an
+\n**High-level Architecture:** See `docs/technical-architecture.docx` (living Markdown source also in `docs/technical-architecture.md` — update both when architecture changes).
+
 administrative search experience. The repository ships with a
 React + TypeScript frontend, a Go HTTP API, a PostgreSQL data tier
 and a deterministic synthetic dataset.

@@ -1,3 +1,7 @@
+// Command benchmark runs the developer benchmark suite. It records
+// the per-request candidate count, query count and duration and
+// prints a summary to stdout. The benchmark uses the in-memory store
+// so it is reproducible without a live database.
 package main
 
 import (

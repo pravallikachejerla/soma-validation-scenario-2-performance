@@ -2,8 +2,6 @@ module github.com/soma-genesis/scenario-2-pricing-perf
 
 go 1.22
 
-replace github.com/soma-genesis/scenario-2-pricing-perf => ./
-
 require (
 	github.com/go-chi/chi/v5 v5.0.13
 	github.com/google/uuid v1.6.0

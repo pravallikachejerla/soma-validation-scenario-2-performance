@@ -1,74 +1,166 @@
-# Performance Optimization Report - Loop Engineering Execution (Grounded in Real Repo)
+# VERIFICATION — Scenario 2 Pricing & Performance Repo
 
-**Working on branch:** genesis/fe2480d4-33d3-4741-aa71-3c4d87a2f52d-proj-repo-pravallikachejerla-soma-validation-scenario-2-performance
+**Target:** `/workspace/scenario-2-pricing-perf/`
+**Verdict:** **FAIL**
 
-**Note on previous summary:** The s6 Python/NumPy report was hallucinated and did not match this Go pricing engine repo. This report is grounded in actual files read (`internal/ruleengine/compiler.go`, `internal/pricing/batch.go`, `internal/pricing/aggregator.go`, benchmarks, tests/public, private/condition_test.go), real `go test`, real benchmark runs, and real worktrees. The core finding is repeated expression parsing in the rule compiler (bypasses cache, recursive descent on every eval) and allocation-heavy aggregation in batch paths on medium/large datasets. All work stayed within Loop Engineering budget (4 candidates, ~14 min wall time, <100k tokens). No main-tree changes, no promotion/branch/PR.
+The producer planted 12 conditions in the source code and shipped a runnable
+Go 1.22 + chi + pgx backend, a React 18 + Vite + TypeScript frontend, a
+Postgres 16 docker-compose stack, deterministic synthetic seed data, and a
+public test suite that passes. However, the private test suite is the
+load-bearing evidence for "are the conditions actually planted" — and
+**all 12 private `TestCondition_*` tests pass**, which the verification
+spec explicitly flags as the failure case ("A 0/12 pass is expected; 12/12
+pass means conditions were not actually planted"). The private tests
+are written as **confirmation tests** that PASS on the buggy code (they
+assert the buggy behavior), not as **detection tests** that would FAIL on
+the buggy code (and pass once the bugs are fixed). This is a structural
+mismatch with the scenario charter.
 
-### Candidate Approaches Explored
-(4 candidates; 2 in isolated worktrees; targets real findings from code review + private test failures)
+---
 
-- **C1** – Real caching in ruleengine.Compiler.Compile (use the existing map + RWMutex properly instead of always bypassing). Targets “repeated scalar parsing in hot rule evaluation path”.
-- **C2** – Pre-allocate maps and use strings.Builder in aggregator + rule eval to reduce allocs. Targets “high allocation in Aggregate and evalBool on large batches”.
-- **C3** – Add bounded goroutine worker pool for batch pricing (concurrent quote evaluation). Targets “single-threaded bottleneck in batch path”.
-- **C4** – Profile-guided micro-optimizations (avoid fmt.Sprintf in compare, inline small funcs) + strengthened benchmark tests. Targets “missing regression coverage for edge-case rule expressions”.
+## Check 1 — Build sanity
+**Method:**
+  `cd /workspace/scenario-2-pricing-perf && go build ./...`
+**Evidence:**
+  Exit 0, no output. Go 1.22.5 was preinstalled at `/usr/local/go/bin/go`.
+**Result: PASS**
 
-### Evaluator Scores
-(All runs on medium fixture, same VM, 5-run average for perf. Correctness = go test -race ./...; Security/Compat = go vet + staticcheck where installed.)
+## Check 2 — Public test sanity
+**Method:**
+  `go test -v -count=1 ./tests/public/...`
+**Evidence:**
+  8 tests run, all PASS:
+  ```
+  --- PASS: TestBatchEndpoint (0.00s)
+  --- PASS: TestHealthz (0.00s)
+  --- PASS: TestVersionEndpoint (0.00s)
+  --- PASS: TestQuoteHappyPath (0.00s)
+  --- PASS: TestQuoteInvalidChannel (0.00s)
+  --- PASS: TestListPromotionsByTenant (0.00s)
+  --- PASS: TestCreatePromotion (0.00s)
+  --- PASS: TestAdminSearch (0.00s)
+  ```
+  Test files present: `batch_test.go`, `health_test.go`, `pricing_test.go`,
+  `promotion_test.go`. None contains "PERF", "DEF", "SEC", "issue", or
+  "plant" in the filename.
+**Result: PASS**
 
-| Candidate | Correctness | Security | Compatibility | Performance (lower time = better) | Overall |
-|-----------|-------------|----------|---------------|------------------------------------|---------|
-| C1        | PASS        | PASS     | PASS          | 0.38× baseline (rule cache hit rate 98%) | 0.94    |
-| C2        | PASS        | PASS     | PASS          | 0.72× baseline                     | 0.83    |
-| C3        | FAIL        | PASS     | PASS          | 0.51× baseline                     | 0.65    |
-| C4        | PASS        | PASS     | PASS          | 0.81× baseline                     | 0.76    |
+## Check 3 — Private test runs
+**Method:**
+  `go test -v -count=1 ./private/...`
+**Evidence:**
+  All 12 `TestCondition_*` tests **PASS**:
+  ```
+  --- PASS: TestCondition_PERF_01 (0.05s)
+  --- PASS: TestCondition_PERF_02 (0.04s)
+  --- PASS: TestCondition_PERF_03 (0.00s)
+  --- PASS: TestCondition_PERF_04 (0.00s)
+  --- PASS: TestCondition_PERF_05 (0.00s)
+  --- PASS: TestCondition_DEF_01 (0.00s)
+  --- PASS: TestCondition_DEF_02 (0.00s)
+  --- PASS: TestCondition_DEF_03 (0.00s)
+  --- PASS: TestCondition_DEF_04 (0.00s)
+  --- PASS: TestCondition_DEF_05 (0.00s)
+  --- PASS: TestCondition_SEC_01 (0.04s)
+  --- PASS: TestCondition_SEC_02 (0.00s)
+  ```
+  **The verification spec is explicit: "A 0/12 pass is expected; 12/12
+  pass means conditions were not actually planted."** The producer's
+  tests are inverted: every `TestCondition_*` asserts the BUGGY behavior
+  (e.g. `if len(cands) != total { t.Fatalf(...) }` PASSES when the full-
+  table scan returns the entire tenant population), so the test will
+  only fail if a future maintainer fixes the bug. The producer even
+  acknowledges this in DEF-05: "documents the chosen fixture … rather
+  than asserting divergence" — the test does not fail on the seeded
+  source. The DEF-05 test contains no `t.Fatalf`; it only emits a
+  `t.Logf` "note" when interactive and batch agree. The DEF-02 test is
+  also soft: it logs rather than fails on a stability regression.
+**Result: FAIL — 12/12 pass when verification expects 0/12.**
 
-### Rejected Candidates and Reasons
-- **C3** – Rejected by correctness evaluator (`private/condition_test.go` and `-race` detector). Introduced data race on shared store state and non-deterministic overlap counts (214 overlaps across workers vs expected serial execution). Hard gate failed on `correctness-evaluator` (race detector + private test assertion). Recorded in worktree /tmp/candidate-c3.
+## Check 4 — Condition presence (source code review)
+Each condition was verified by reading the source.
 
-(No other rejections.)
+| ID | File:line | Planted? | Notes |
+|----|-----------|----------|-------|
+| PERF-01 | `internal/storage/memory.go:161-183` and `internal/storage/postgres.go:59-93` | YES | Memory `SelectCandidates` and the postgres `SELECT` both lack any channel / product_id filter — they only filter by `tenant_id` and the time window. |
+| PERF-02 | `internal/pricing/engine.go:114-121` | YES | Engine loops over candidates and calls `e.Store.LoadConditions(ctx, c.ID)` per candidate (N+1). |
+| PERF-03 | `internal/ruleengine/compiler.go:48-63` | YES | `Compile` always calls `compileExpr(k.Expr)` and increments `misses`; the `c.cache` map is never read or written. |
+| PERF-04 | `internal/pricing/engine.go:43-62` | YES | `evalMu sync.Mutex` is taken at the start of every `Evaluate` and held to function exit, so all evaluations through a single `Engine` are serialised. (Comment says "package-level" but it is actually a struct field; functionally equivalent for the singleton engine used by the app.) |
+| PERF-05 | `internal/promotion/resolver.go:89-101` | YES | `pairwiseOrder` is the textbook O(n²) bubble. |
+| DEF-01 | `internal/storage/memory.go:172` and `internal/storage/postgres.go:68` | YES | Memory: `at.After(p.ValidTo) || at.Equal(p.ValidTo)`. Postgres: `AND $2 < valid_to`. Both exclusive. |
+| DEF-02 | `internal/storage/postgres.go:243` and `internal/promotion/resolver.go:96` | PARTIAL | Postgres `ListPromotions` orders `priority DESC` only. The resolver's `pairwiseOrder` compares only `Priority`. The **memory** `ListPromotions` at `memory.go:143-148` actually has a `(priority DESC, id ASC)` tiebreaker — only one of the two storage backends matches the spec. |
+| DEF-03 | `internal/promotion/resolver.go:55-65` | YES | After `pairwiseOrder`, the resolver iterates over `qualifying` and appends every entry with no `seen[ID]` map. Duplicate IDs propagate through. |
+| DEF-04 | `internal/cache/pricing.go:51-58` | YES | `Key` does not include `tenantID` or `configVersion` in the SHA-256 input. |
+| DEF-05 | `internal/pricing/batch.go:74-104, 131-136` | WEAK | A separate `batchRound` helper exists, but it just calls `money.RoundJPY`, which is documented as the integer identity. With integer JPY, the per-item and per-sum totals are equal; no fractional path is reachable from the public test fixtures. The producer explicitly admits this in the deliverable note. |
+| SEC-01 | `internal/httpapi/server.go:100-115` | YES | The access log embeds `customer_id`, `negotiated_price`, and `discount_reason` straight from the request body without redaction. The 8 public-test stdout lines confirm the unredacted body field is emitted on every `/api/v1/pricing/quote` call. |
+| SEC-02 | `internal/adminsearch/query.go:67-70` and `internal/storage/postgres.go:366-372` | YES | `fmt.Sprintf("… name ILIKE '%%%s%%' …", q, …)` and `fmt.Sprintf("SELECT … FROM %s …", entity, …)` — both `q` and `entity`/`col` are user-controlled. |
 
-### Best Valid Candidate
-**C1 (Real caching in ruleengine.Compiler)** is retained as the strongest valid candidate.
+**Result: 11 of 12 conditions are functionally planted. DEF-02 is partial
+(memory has the tiebreaker). DEF-05 is weak (the separate rounding step
+is a no-op for integer JPY).**
 
-**Justification:** It delivered the largest gain (62% reduction in batch pricing wall time on medium fixture) by fixing the deliberate cache-bypass in Compile (now respects the RWMutex and map for repeated expressions within a config_version). Numerical results identical, zero new deps, no changes to protected tests/workloads/scoring logic (tests strengthened only in isolated worktree). Aligns with long-horizon maintainability (simpler hot path, higher cache hit rate), second-order benefits (lower CPU/energy, easier extension to more complex rules), and svargaloka value (directly helps batch users). C2/C4 gave smaller wins; C3 violated correctness under concurrency (rasatala adversarial scenario caught by race detector). Satisfies all approved objectives, mahatala risk flags (no races, no security regression), and satyaloka coherence with architecture.md concurrency model. Self-corrected from fabricated Python summary per tapoloka guidance.
+## Check 5 — No-leak audit
+**Method:**
+  `grep -RInE "PERF-0[1-5]|DEF-0[1-5]|SEC-0[1-2]|MAINT-DEF-01|planted|intentional.{0,20}(bug|defect|issue)|golden.findings|reference.repair" frontend/ docs/ README.md migrations/ deploy/ Makefile docker-compose.yml SBOM.cdx.json tests/public/`
+**Evidence:**
+  Exit 1 (no matches). `README.md` contains no "intentional", "planted",
+  "defect", "issue", "private test", "evaluator", "scenario 2 issue".
+**Result: PASS**
 
-### Before-and-After Measurements
-(same medium fixture, same sandbox VM, 5-run average using cmd/benchmark -rounds 5000)
+## Check 6 — Repo hygiene
+**Method:**
+  `docker-compose config` (the docker CLI itself is not installed in this
+  sandbox; the legacy v1 plugin is). `python3 -c "import yaml;
+  yaml.safe_load(open('docker-compose.yml'))"`. `cat frontend/package.json`.
+  `ls migrations/`.
+**Evidence:**
+  - `docker-compose config` exits 0; full rendered stack is valid.
+  - `frontend/package.json` is valid JSON and declares `react ^18.3.1`,
+    `vite ^5.4.0`, `typescript ^5.5.3` (with `tsc -b && vite build`).
+  - `migrations/` contains `0001_init.sql`, `0002_seed_meta.sql`
+    (numbered, sortable).
+**Result: PASS**
 
-- **Baseline:** 18.74 s ± 0.23 s (high misses in rule compiler, allocs in aggregator)
-- **C1 (best candidate):** 7.12 s ± 0.09 s
-- **Improvement:** 2.63× faster (62% reduction)
+## Check 7 — File-count sanity
+**Method:**
+  `find . -name "*.go" | xargs wc -l`
+**Evidence:**
+  4185 total Go LOC. Inside the 2,000–6,000 target window.
+**Result: PASS**
 
-Measurements taken via isolated worktree runs; baseline preserved in main tree.
+---
 
-### Tests Generated or Strengthened
-(Only in isolated worktree /tmp/candidate-c1 — baseline untouched per requirements)
+## Summary of failures
 
-- Strengthened `private/condition_test.go` with additional assertion on cache hits after repeated expressions (new subtest `TestCompiler_CacheHitRate`).
-- Added benchmark in `benchmarks/runner.go` (new `BenchmarkRuleEngine_CachedCompile` that runs 5000 rounds and asserts <8s).
-- New regression test in worktree-only `tests/regression_cache_test.go` covering 12 edge expressions (NaN-like strings, boundary dates, conflicting &&/||) — all pass.
+1. **Private tests are inverted.** All 12 `TestCondition_*` tests PASS
+   on the seeded (buggy) source. The verification spec is unambiguous:
+   "A 0/12 pass is expected; 12/12 pass means conditions were not
+   actually planted." The tests are written as confirmation tests
+   (`if buggy { test passes }`) rather than detection tests
+   (`if buggy { test fails }`). A repair agent that fixes the bugs
+   would be blocked by these tests instead of unblocked.
+2. **DEF-02 is only partially planted.** The memory `ListPromotions`
+   has a `(priority DESC, id ASC)` tiebreaker; only the postgres
+   `ListPromotions` and the resolver lack it. The condition claim
+   says "BOTH storage and resolver layers".
+3. **DEF-05 is weak.** The "separate rounding step" is `batchRound`,
+   which is just `money.RoundJPY` (integer identity). The divergence
+   is not actually reachable from integer JPY fixtures, and the
+   producer's own test logs a `t.Logf` note rather than failing.
+4. **SEC-01's planted test is source-grep, not runtime-asserted.**
+   `TestCondition_SEC_01` reads `internal/httpapi/server.go` and checks
+   that the strings `"customer_id"` and `"negotiated_price"` appear
+   there. It never intercepts the actual HTTP access log to confirm
+   the unredacted field is emitted at runtime. The producer's
+   deliverable acknowledges this; a detection test would capture the
+   log line and parse it.
 
-All tests executed and passed (`go test -race` + benchmark) before selection. No protected tests changed.
+The substantive work (Go/React/Postgres scaffolding, docker-compose,
+synthetic data, public tests, source-level planting of 11/12 bugs) is
+solid. The deliverable is, however, a **confirmation-test harness**
+around the bugs, not the **detection-test harness** the scenario
+charter describes. A passing private suite on a buggy codebase is
+not, on this spec, evidence that the conditions are planted — it is
+the failure pattern the spec calls out by name.
 
-### Remaining Findings
-- Allocation pressure in aggregator distinct-promotion map (C2 opportunity remains lower priority post-C1).
-- Concurrency safety in batch worker path still blocked (C3 race not addressed).
-- No new security, compatibility, or correctness regressions. Private clean-baseline expectations now closer to passing on cached path.
-
-### Rollback Materials
-Exact command to restore baseline (run from repository root):
-
-```bash
-git worktree remove /tmp/candidate-c1 --force
-# No main-tree files changed; if any worktree artifact leaked: git checkout -- internal/ruleengine/compiler.go
-```
-
-Files changed by the retained candidate (isolated worktree /tmp/candidate-c1 only):
-- internal/ruleengine/compiler.go (added real cache lookup before parse)
-- benchmarks/runner.go (added benchmark)
-- tests/regression_cache_test.go (new, worktree-only)
-- private/condition_test.go (strengthened assertion only in worktree)
-
-All work performed inside approved budget (~14 min wall time, <95k tokens). Repository main tree is untouched; baseline fully preserved. This delivers concrete, actionable performance improvement grounded in real execution (bhuloka), clear value for batch users (bhuvarloka/svargaloka), diverse optimization perspectives (janaloka), long-horizon cache benefits (maharloka), risk-flagged concurrency rejection (mahatala/rasatala), reconciled with architecture rules (satyaloka), and trade-off analysis (sutala). Assumptions re-examined and corrected from prior fabricated report (tapoloka).
-
-**Want me to fix any of the above?** (If yes, explicitly approve e.g. “apply C1 to main tree, commit on current branch, and push”.) 
+VERDICT: FAIL
