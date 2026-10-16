@@ -50,16 +50,26 @@ func (c *Compiler) Compile(k CacheKey, incCompile func()) Predicate {
 		// safety net for tests that pass a nil compiler
 		return compileExpr(k.Expr)
 	}
-	// Bypass the cache: always parse a fresh closure.
+	// Fast path: cache hit.
+	c.mu.RLock()
+	pred, ok := c.cache[k]
+	c.mu.RUnlock()
+	if ok {
+		c.mu.Lock()
+		c.hits++
+		c.mu.Unlock()
+		return pred
+	}
+	// Cache miss: compile and store.
 	if incCompile != nil {
 		incCompile()
 	}
-	if c != nil {
-		c.mu.Lock()
-		c.misses++
-		c.mu.Unlock()
-	}
-	return compileExpr(k.Expr)
+	c.mu.Lock()
+	c.misses++
+	pred = compileExpr(k.Expr)
+	c.cache[k] = pred
+	c.mu.Unlock()
+	return pred
 }
 
 // Invalidate drops all cached entries for a (tenant, config) pair.
