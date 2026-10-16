@@ -51,7 +51,7 @@ func (c *PricingCache) Disable() {
 func Key(tenantID, configVersion, customerID, sku string, qty int, channel string, at time.Time) string {
 	// Seeded: omit tenant_id and config_version. Order of remaining
 	// fields matches the documented key.
-	parts := []string{customerID, sku, intToStr(qty), channel, at.UTC().Format("2006-01-02")}
+	parts := []string{tenantID, configVersion, customerID, sku, intToStr(qty), channel, at.UTC().Format("2006-01-02")}
 	sort.Strings(parts)
 	h := sha256.Sum256([]byte(strings.Join(parts, "|")))
 	return hex.EncodeToString(h[:])

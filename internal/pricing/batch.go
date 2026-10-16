@@ -61,13 +61,14 @@ func (e *Engine) evaluateBatchItem(ctx context.Context, req domain.PricingReques
 	if err != nil {
 		return domain.PricingDecision{}, err
 	}
-	conds := map[string][]domain.PromotionCondition{}
-	for _, c := range candidates {
-		cs, err := e.Store.LoadConditions(ctx, c.ID)
-		if err != nil {
-			return domain.PricingDecision{}, err
-		}
-		conds[c.ID] = cs
+	// Conditions are loaded in bulk to avoid N+1 round-trips.
+	ids := make([]string, len(candidates))
+	for i, c := range candidates {
+		ids[i] = c.ID
+	}
+	conds, err := e.Store.LoadAllConditions(ctx, ids)
+	if err != nil {
+		return domain.PricingDecision{}, err
 	}
 	resolved := e.Resolver.ResolveConflicts(candidates, req.Channel, product.ID)
 

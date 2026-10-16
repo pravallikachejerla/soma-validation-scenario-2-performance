@@ -6,7 +6,6 @@ package pricing
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/soma-genesis/scenario-2-pricing-perf/internal/cache"
@@ -41,12 +40,11 @@ type Store interface {
 // Evaluate call. The clean path holds no global lock and lets
 // independent requests run in parallel.
 type Engine struct {
-	Store     Store
-	Cache     *cache.PricingCache
-	Compiler  *ruleengine.Compiler
-	Metrics   *observability.Metrics
-	Resolver  *promotion.Resolver
-	evalMu    sync.Mutex // A package-level mutex serialises every evaluation.
+	Store    Store
+	Cache    *cache.PricingCache
+	Compiler *ruleengine.Compiler
+	Metrics  *observability.Metrics
+	Resolver *promotion.Resolver
 }
 
 // New returns a fully-wired engine.
@@ -56,10 +54,6 @@ func New(s Store, c *cache.PricingCache, comp *ruleengine.Compiler, m *observabi
 
 // Evaluate runs a single interactive pricing request.
 func (e *Engine) Evaluate(ctx context.Context, req domain.PricingRequest) (domain.PricingDecision, error) {
-	// A package-level mutex serialises every evaluation.
-	// evaluation path so independent requests are serialised.
-	e.evalMu.Lock()
-	defer e.evalMu.Unlock()
 
 	if err := validation.ValidatePricingRequest(req); err != nil {
 		return domain.PricingDecision{}, err
@@ -110,14 +104,14 @@ func (e *Engine) Evaluate(ctx context.Context, req domain.PricingRequest) (domai
 		e.Metrics.ObserveCandidate(int64(len(candidates)))
 	}
 
-	// Conditions are loaded per-promotion.
-	conds := map[string][]domain.PromotionCondition{}
-	for _, c := range candidates {
-		cs, err := e.Store.LoadConditions(ctx, c.ID)
-		if err != nil {
-			return domain.PricingDecision{}, err
-		}
-		conds[c.ID] = cs
+	// Conditions are loaded in bulk to avoid N+1 round-trips.
+	ids := make([]string, len(candidates))
+	for i, c := range candidates {
+		ids[i] = c.ID
+	}
+	conds, err := e.Store.LoadAllConditions(ctx, ids)
+	if err != nil {
+		return domain.PricingDecision{}, err
 	}
 
 	resolved := e.Resolver.ResolveConflicts(candidates, req.Channel, product.ID)
