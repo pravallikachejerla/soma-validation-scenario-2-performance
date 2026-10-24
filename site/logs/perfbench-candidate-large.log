@@ -1,0 +1,5 @@
+profile=large n=2000 c=8 rounds=3
+ROUND 1: p50=788.427µs p95=209.315332ms p99=293.907194ms rps=205 queries=7030 q/req=3.52 errors=0 elapsed=9.735868995s
+ROUND 2: p50=822.171µs p95=197.388986ms p99=304.106922ms rps=240 queries=7035 q/req=3.52 errors=0 elapsed=8.333531536s
+ROUND 3: p50=739.997µs p95=171.98975ms p99=208.423943ms rps=373 queries=7035 q/req=3.52 errors=0 elapsed=5.363317297s
+MEMORY: alloc_before=0MB alloc_after=0MB total_alloc_delta=3122MB sys=52MB num_gc=249

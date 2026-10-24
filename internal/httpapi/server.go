@@ -375,12 +375,6 @@ func (s *Server) handleSeed(w http.ResponseWriter, r *http.Request) {
 		for _, p := range ds.Promotions {
 			s.app.MemStore.PutPromotion(p, condsByPromo[p.ID])
 		}
-		// Set active config version for each tenant so pricing requests can resolve.
-		for _, t := range ds.TenantIDs {
-			cfgID := "cfg-" + t
-			s.app.MemStore.PutConfigVersion(domain.ConfigVersion{ID: cfgID, TenantID: t, Label: "default", Active: true, CreatedAt: time.Now().UTC()})
-			s.app.MemStore.SetActiveConfig(t, cfgID)
-		}
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"profile": profile.Name, "counts": written})
 }

@@ -1,5 +1,5 @@
 profile=small n=2000 c=8 rounds=3
-ROUND 1: p50=1.432µs p95=4.659µs p99=328.776µs rps=119457 queries=2280 q/req=1.14 errors=0 elapsed=16.74241ms
-ROUND 2: p50=1.473µs p95=4.569µs p99=17.072µs rps=111325 queries=2280 q/req=1.14 errors=0 elapsed=17.965385ms
-ROUND 3: p50=3.226µs p95=8.766µs p99=59.111µs rps=76213 queries=2280 q/req=1.14 errors=0 elapsed=26.242116ms
+ROUND 1: p50=1.873µs p95=142.267µs p99=13.449408ms rps=11301 queries=2280 q/req=1.14 errors=0 elapsed=176.971986ms
+ROUND 2: p50=1.873µs p95=106.86µs p99=5.339367ms rps=11114 queries=2280 q/req=1.14 errors=0 elapsed=179.951877ms
+ROUND 3: p50=1.463µs p95=86.783µs p99=29.299826ms rps=11419 queries=2280 q/req=1.14 errors=0 elapsed=175.149966ms
 MEMORY: alloc_before=0MB alloc_after=0MB total_alloc_delta=2MB sys=12MB num_gc=1

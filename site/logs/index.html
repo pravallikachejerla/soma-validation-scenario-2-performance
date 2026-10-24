@@ -5,53 +5,54 @@
 <title>Logs and Profile — Baseline vs Candidate A</title>
 <style>
 body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f8fafc;color:#0f172a}
-header{background:#0f172a;color:#f8fafc;padding:1rem 1.5rem}
-header h1{margin:0;font-size:1.3rem}
-main{max-width:1000px;margin:0 auto;padding:1.5rem}
-.card{background:white;border:1px solid #e2e8f0;border-radius:6px;padding:1rem;margin-bottom:1rem}
-pre{background:#f1f5f9;padding:0.75rem;border-radius:4px;overflow-x:auto;font-size:0.85rem;max-height:400px}
-h2{margin-top:1.5rem;border-bottom:2px solid #e2e8f0;padding-bottom:0.5rem}
+header{background:#0f172a;color:#f8fafc;padding:1.5rem}
+header h1{margin:0;font-size:1.5rem}
+main{max-width:900px;margin:0 auto;padding:1.5rem}
+.card{background:white;border:1px solid #e2e8f0;border-radius:6px;padding:1.5rem;margin-bottom:1rem}
+.card h2{margin-top:0}
+a{color:#2563eb}
+ul{line-height:1.8}
 </style>
 </head>
 <body>
-<header><h1>Logs and Profile</h1></header>
+<header>
+<h1>Logs and Profile</h1>
+<p>Raw benchmark output and API access logs</p>
+</header>
 <main>
 
 <div class="card">
-<h2>Benchmark Logs</h2>
+<h2>API Access Logs</h2>
 <ul>
-<li><a href="perfbench-baseline.log">Baseline — large profile (2000 req, 8 concurrent, 3 rounds)</a></li>
-<li><a href="perfbench-candidate.log">Candidate — large profile (2000 req, 8 concurrent, 3 rounds)</a></li>
-<li><a href="perfbench-baseline-medium.log">Baseline — medium profile</a></li>
-<li><a href="perfbench-candidate-medium.log">Candidate — medium profile</a></li>
-<li><a href="perfbench-baseline-small.log">Baseline — small profile</a></li>
-<li><a href="perfbench-candidate-small.log">Candidate — small profile</a></li>
+<li><a href="api-baseline.log">Baseline API log (port 8081)</a></li>
+<li><a href="api-candidate.log">Candidate API log (port 8082)</a></li>
 </ul>
 </div>
 
 <div class="card">
-<h2>API Server Logs</h2>
+<h2>HTTP Load Test Logs</h2>
 <ul>
-<li><a href="api-baseline.log">Baseline API server (port 8081)</a></li>
-<li><a href="api-candidate.log">Candidate API server (port 8082)</a></li>
+<li><a href="httpload-baseline.log">Baseline HTTP load summary</a></li>
+<li><a href="httpload-baseline.log.latencies">Baseline per-request latencies</a></li>
+<li><a href="httpload-candidate.log">Candidate HTTP load summary</a></li>
+<li><a href="httpload-candidate.log.latencies">Candidate per-request latencies</a></li>
 </ul>
 </div>
 
 <div class="card">
-<h2>Seed Logs</h2>
+<h2>Perfbench Output (in-memory benchmark)</h2>
+<h3>Baseline</h3>
 <ul>
-<li><a href="seed-baseline.log">Seed log (large profile)</a></li>
+<li><a href="perfbench-baseline-large.log">Large profile (10K products, 5K promotions)</a></li>
+<li><a href="perfbench-baseline-medium.log">Medium profile (1K products, 500 promotions)</a></li>
+<li><a href="perfbench-baseline-small.log">Small profile (100 products, 50 promotions)</a></li>
 </ul>
-</div>
-
-<div class="card">
-<h2>CPU Profile</h2>
-<p>CPU profiling was not captured in this evaluation. The perfbench binary does not include <code>net/http/pprof</code> integration. A production profiling run would require adding <code>import _ "net/http/pprof"</code> and running <code>go tool pprof</code> against a live server under load.</p>
-</div>
-
-<div class="card">
-<h2>Memory Profile</h2>
-<p>Memory allocation data is captured in the benchmark logs (TotalAlloc before/after each round). See the <a href="../dashboard/index.html">comparison dashboard</a> for the summary.</p>
+<h3>Candidate</h3>
+<ul>
+<li><a href="perfbench-candidate-large.log">Large profile</a></li>
+<li><a href="perfbench-candidate-medium.log">Medium profile</a></li>
+<li><a href="perfbench-candidate-small.log">Small profile</a></li>
+</ul>
 </div>
 
 </main>
