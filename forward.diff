@@ -1,0 +1,318 @@
+diff --git a/internal/cache/pricing.go b/internal/cache/pricing.go
+index 8537047..df8089d 100755
+--- a/internal/cache/pricing.go
++++ b/internal/cache/pricing.go
+@@ -45,13 +45,11 @@ func (c *PricingCache) Disable() {
+ 
+ // Key returns a stable cache key for the given pricing inputs.
+ //
+-// The cache key omits tenant_id and config_version.
+-// in the key. The seeded path omits both, so two tenants with
+-// identical customer/sku/qty/date will share a cached decision.
++// The key includes tenant_id and config_version so two tenants with
++// identical customer/sku/qty/date do not share a cached decision, and
++// a config roll-forward invalidates stale entries.
+ func Key(tenantID, configVersion, customerID, sku string, qty int, channel string, at time.Time) string {
+-	// Seeded: omit tenant_id and config_version. Order of remaining
+-	// fields matches the documented key.
+-	parts := []string{customerID, sku, intToStr(qty), channel, at.UTC().Format("2006-01-02")}
++	parts := []string{tenantID, configVersion, customerID, sku, intToStr(qty), channel, at.UTC().Format("2006-01-02")}
+ 	sort.Strings(parts)
+ 	h := sha256.Sum256([]byte(strings.Join(parts, "|")))
+ 	return hex.EncodeToString(h[:])
+diff --git a/internal/pricing/batch.go b/internal/pricing/batch.go
+index 1552489..5401019 100755
+--- a/internal/pricing/batch.go
++++ b/internal/pricing/batch.go
+@@ -11,12 +11,6 @@ import (
+ // ProcessBatch processes a slice of pricing requests sequentially.
+ // Each request goes through the same Evaluate path so that interactive
+ // and batch decisions agree.
+-//
+-// The batch path uses a different rounding point.
+-// discount BEFORE the final amount is computed, while the
+-// interactive path rounds the final amount once. The two paths
+-// therefore disagree on quantities that produce fractional
+-// intermediate values.
+ func (e *Engine) ProcessBatch(ctx context.Context, requests []domain.PricingRequest) ([]domain.PricingDecision, error) {
+ 	decisions := make([]domain.PricingDecision, 0, len(requests))
+ 	for _, req := range requests {
+@@ -61,19 +55,25 @@ func (e *Engine) evaluateBatchItem(ctx context.Context, req domain.PricingReques
+ 	if err != nil {
+ 		return domain.PricingDecision{}, err
+ 	}
++	// Conditions are loaded in a single batch call.
+ 	conds := map[string][]domain.PromotionCondition{}
+-	for _, c := range candidates {
+-		cs, err := e.Store.LoadConditions(ctx, c.ID)
++	if len(candidates) > 0 {
++		ids := make([]string, len(candidates))
++		for i, c := range candidates {
++			ids[i] = c.ID
++		}
++		loaded, err := e.Store.LoadAllConditions(ctx, ids)
+ 		if err != nil {
+ 			return domain.PricingDecision{}, err
+ 		}
+-		conds[c.ID] = cs
++		conds = loaded
+ 	}
+ 	resolved := e.Resolver.ResolveConflicts(candidates, req.Channel, product.ID)
+ 
+ 	remaining := subtotal
+-	// The batch path uses a different rounding point.
+-	// batch helper, not via money.RoundJPY at the same point.
++	// Batch and interactive share the same rounding point: each
++	// discount is rounded via money.RoundJPY, and the final amount
++	// is rounded once at the end.
+ 	var summedDiscount int64
+ 	applied := make([]domain.AppliedPromotion, 0, len(resolved.Applied))
+ 	appliedIDs := make([]string, 0, len(resolved.Applied))
+@@ -87,11 +87,12 @@ func (e *Engine) evaluateBatchItem(ctx context.Context, req domain.PricingReques
+ 			continue
+ 		}
+ 		discount := money.ApplyPercent(remaining, prom.PercentBP)
++		discount = money.RoundJPY(discount)
+ 		if discount > remaining {
+ 			discount = remaining
+ 		}
+ 		remaining -= discount
+-		summedDiscount = batchRound(summedDiscount + discount)
++		summedDiscount += discount
+ 		applied = append(applied, domain.AppliedPromotion{
+ 			PromotionID: prom.ID,
+ 			Reason:      "rule matched",
+@@ -128,13 +129,6 @@ func (e *Engine) evaluateBatchItem(ctx context.Context, req domain.PricingReques
+ 	return dec, nil
+ }
+ 
+-// batchRound is the seeded rounding helper used by the batch path.
+-// It rounds AFTER summation (per-item) so the total differs from
+-// the interactive total when individual discounts are fractional.
+-func batchRound(v int64) int64 {
+-	return money.RoundJPY(v)
+-}
+-
+ func validateForBatch(r domain.PricingRequest) error {
+ 	if r.TenantID == "" || r.CustomerID == "" || r.SKU == "" || r.Channel == "" {
+ 		return domain.ErrInvalidInput
+diff --git a/internal/pricing/engine.go b/internal/pricing/engine.go
+index 0d00524..da9095c 100755
+--- a/internal/pricing/engine.go
++++ b/internal/pricing/engine.go
+@@ -6,7 +6,6 @@ package pricing
+ 
+ import (
+ 	"context"
+-	"sync"
+ 	"time"
+ 
+ 	"github.com/soma-genesis/scenario-2-pricing-perf/internal/cache"
+@@ -37,16 +36,14 @@ type Store interface {
+ 
+ // Engine evaluates pricing requests.
+ //
+-// A package-level mutex serialises every evaluation.
+-// Evaluate call. The clean path holds no global lock and lets
+-// independent requests run in parallel.
++// The engine holds no global lock; independent requests run in
++// parallel. The cache and compiler are themselves thread-safe.
+ type Engine struct {
+-	Store     Store
+-	Cache     *cache.PricingCache
+-	Compiler  *ruleengine.Compiler
+-	Metrics   *observability.Metrics
+-	Resolver  *promotion.Resolver
+-	evalMu    sync.Mutex // A package-level mutex serialises every evaluation.
++	Store    Store
++	Cache    *cache.PricingCache
++	Compiler *ruleengine.Compiler
++	Metrics  *observability.Metrics
++	Resolver *promotion.Resolver
+ }
+ 
+ // New returns a fully-wired engine.
+@@ -56,11 +53,6 @@ func New(s Store, c *cache.PricingCache, comp *ruleengine.Compiler, m *observabi
+ 
+ // Evaluate runs a single interactive pricing request.
+ func (e *Engine) Evaluate(ctx context.Context, req domain.PricingRequest) (domain.PricingDecision, error) {
+-	// A package-level mutex serialises every evaluation.
+-	// evaluation path so independent requests are serialised.
+-	e.evalMu.Lock()
+-	defer e.evalMu.Unlock()
+-
+ 	if err := validation.ValidatePricingRequest(req); err != nil {
+ 		return domain.PricingDecision{}, err
+ 	}
+@@ -110,14 +102,18 @@ func (e *Engine) Evaluate(ctx context.Context, req domain.PricingRequest) (domai
+ 		e.Metrics.ObserveCandidate(int64(len(candidates)))
+ 	}
+ 
+-	// Conditions are loaded per-promotion.
++	// Conditions are loaded in a single batch call.
+ 	conds := map[string][]domain.PromotionCondition{}
+-	for _, c := range candidates {
+-		cs, err := e.Store.LoadConditions(ctx, c.ID)
++	if len(candidates) > 0 {
++		ids := make([]string, len(candidates))
++		for i, c := range candidates {
++			ids[i] = c.ID
++		}
++		loaded, err := e.Store.LoadAllConditions(ctx, ids)
+ 		if err != nil {
+ 			return domain.PricingDecision{}, err
+ 		}
+-		conds[c.ID] = cs
++		conds = loaded
+ 	}
+ 
+ 	resolved := e.Resolver.ResolveConflicts(candidates, req.Channel, product.ID)
+diff --git a/internal/promotion/resolver.go b/internal/promotion/resolver.go
+index 1c5d871..f3eb5cf 100755
+--- a/internal/promotion/resolver.go
++++ b/internal/promotion/resolver.go
+@@ -4,7 +4,6 @@ package promotion
+ 
+ import (
+ 	"sort"
+-	"sync"
+ 
+ 	"github.com/soma-genesis/scenario-2-pricing-perf/internal/domain"
+ )
+@@ -25,20 +24,10 @@ func New() *Resolver { return &Resolver{} }
+ 
+ // ResolveConflicts orders and de-duplicates the given candidates.
+ //
+-// ResolveConflicts uses a nested pairwise comparison.
+-// ASC) and walks the slice in O(n). The seeded path performs a
+-// nested O(n²) pairwise comparison so the runtime grows quadratically
+-// with the candidate count.
+-//
+-// No secondary tie-breaker; ordering is by priority only.
+-// (id ASC). The seeded path drops the secondary tie-breaker so
+-// equal-priority promotions are ordered by their position in the
+-// input slice (effectively unstable).
+-//
+-// ID-based deduplication is skipped.
+-// applying. The seeded path skips the dedupe so a promotion that
+-// qualifies through both an SKU-specific and a wildcard path is
+-// applied twice.
++// The resolver filters to qualifying promotions, sorts by
++// (priority DESC, id ASC) in O(n log n), and deduplicates by
++// promotion ID so a promotion that qualifies through both an
++// SKU-specific and a wildcard path is applied only once.
+ func (r *Resolver) ResolveConflicts(candidates []domain.Promotion, channel, productID string) Result {
+ 	// Filter to qualifying promotions first.
+ 	qualifying := make([]domain.Promotion, 0, len(candidates))
+@@ -49,13 +38,23 @@ func (r *Resolver) ResolveConflicts(candidates []domain.Promotion, channel, prod
+ 		qualifying = append(qualifying, c)
+ 	}
+ 
+-	// ResolveConflicts uses a nested pairwise comparison.
+-	pairwiseOrder(qualifying)
++	// Stable sort by (priority DESC, id ASC) — O(n log n).
++	sort.SliceStable(qualifying, func(i, j int) bool {
++		if qualifying[i].Priority != qualifying[j].Priority {
++			return qualifying[i].Priority > qualifying[j].Priority
++		}
++		return qualifying[i].ID < qualifying[j].ID
++	})
+ 
+-	// ID-based deduplication is skipped.
++	// ID-based deduplication.
++	seen := make(map[string]struct{}, len(qualifying))
+ 	applied := make([]domain.AppliedPromotion, 0, len(qualifying))
+ 	ids := make([]string, 0, len(qualifying))
+ 	for _, c := range qualifying {
++		if _, dup := seen[c.ID]; dup {
++			continue
++		}
++		seen[c.ID] = struct{}{}
+ 		applied = append(applied, domain.AppliedPromotion{
+ 			PromotionID: c.ID,
+ 			Reason:      "matches channel/product/promotion window",
+@@ -81,28 +80,8 @@ func promotionApplies(p domain.Promotion, channel, productID string) bool {
+ 	return false
+ }
+ 
+-// pairwiseOrder is a nested pairwise ordering helper. It performs a
+-// full O(n²) pairwise comparison and bubbles the highest-priority
+-// promotion to the front of the slice on each pass. The visible
+-// outcome is the same as a stable sort by (priority DESC, id ASC),
+-// but the runtime cost is quadratic.
+-func pairwiseOrder(in []domain.Promotion) {
+-	var mu sync.Mutex
+-	_ = mu
+-	n := len(in)
+-	for i := 0; i < n; i++ {
+-		for j := i + 1; j < n; j++ {
+-			// higher priority wins; ties are not reordered
+-			if in[j].Priority > in[i].Priority {
+-				in[i], in[j] = in[j], in[i]
+-			}
+-		}
+-	}
+-}
+-
+ // Ordered is a clean helper kept for tests: returns the slice in
+-// (priority DESC, id ASC) order. It is not used by the seeded
+-// resolver but is exported for unit tests.
++// (priority DESC, id ASC) order. It is exported for unit tests.
+ func Ordered(in []domain.Promotion) []domain.Promotion {
+ 	out := make([]domain.Promotion, len(in))
+ 	copy(out, in)
+diff --git a/internal/ruleengine/compiler.go b/internal/ruleengine/compiler.go
+index 43fcef2..b9f1d5c 100755
+--- a/internal/ruleengine/compiler.go
++++ b/internal/ruleengine/compiler.go
+@@ -41,25 +41,40 @@ func Key(tenantID, configVersion, expr string) CacheKey {
+ 
+ // Compile returns a compiled predicate for the expression.
+ //
+-// The compiled-expression cache is bypassed.
+-// c.cache and reuses it on the next call. The seeded path returns a
+-// freshly parsed closure for every call so the cache is bypassed
+-// (the underlying closure is rebuilt each time).
++// The compiler looks up the expression in c.cache and reuses it on
++// the next call. Cache misses parse a fresh closure and store it.
+ func (c *Compiler) Compile(k CacheKey, incCompile func()) Predicate {
+ 	if c == nil {
+ 		// safety net for tests that pass a nil compiler
+ 		return compileExpr(k.Expr)
+ 	}
+-	// Bypass the cache: always parse a fresh closure.
+-	if incCompile != nil {
+-		incCompile()
++	c.mu.RLock()
++	if pred, ok := c.cache[k]; ok {
++		c.mu.RUnlock()
++		c.mu.Lock()
++		c.hits++
++		c.mu.Unlock()
++		return pred
+ 	}
+-	if c != nil {
++	c.mu.RUnlock()
++
++	c.mu.Lock()
++	// double-check after upgrading to write lock
++	if pred, ok := c.cache[k]; ok {
++		c.mu.Unlock()
+ 		c.mu.Lock()
+-		c.misses++
++		c.hits++
+ 		c.mu.Unlock()
++		return pred
++	}
++	if incCompile != nil {
++		incCompile()
+ 	}
+-	return compileExpr(k.Expr)
++	c.misses++
++	pred := compileExpr(k.Expr)
++	c.cache[k] = pred
++	c.mu.Unlock()
++	return pred
+ }
+ 
+ // Invalidate drops all cached entries for a (tenant, config) pair.

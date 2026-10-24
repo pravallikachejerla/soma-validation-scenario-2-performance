@@ -1,0 +1,2 @@
+wrote /work/testdata/fixtures/large.json sha256=7af31b9a8e7ab2c8056d88f9792bd029d12dcd3e7edc07908989e456e71daa4e profile=large tenants=10 products=10000 customers=2000 promotions=5000 conditions=2463
+in-memory store populated with 10000 products and 5000 promotions

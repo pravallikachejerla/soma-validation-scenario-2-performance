@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Performance Acceptance Package — Baseline vs Candidate A</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f8fafc;color:#0f172a}
+header{background:#0f172a;color:#f8fafc;padding:1.5rem}
+header h1{margin:0;font-size:1.5rem}
+header p{margin:0.5rem 0 0;color:#94a3b8;font-size:0.9rem}
+main{max-width:900px;margin:0 auto;padding:1.5rem}
+.card{background:white;border:1px solid #e2e8f0;border-radius:6px;padding:1.5rem;margin-bottom:1rem}
+.card h2{margin-top:0}
+a{color:#2563eb}
+ul{line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+<h1>Performance Acceptance Package</h1>
+<p>Baseline (commit 70b7e68) vs Candidate A — deployed in SOMA Genesis Sandbox, 2026-10-24</p>
+</header>
+<main>
+
+<div class="card">
+<h2>Deliverables</h2>
+<ul>
+<li><a href="dashboard/index.html">Performance Comparison Dashboard</a></li>
+<li><a href="test-report/index.html">Test Report</a></li>
+<li><a href="db-evidence/index.html">Database Query Evidence</a></li>
+<li><a href="logs/index.html">Logs and Profile</a></li>
+</ul>
+</div>
+
+<div class="card">
+<h2>Application URLs (sandbox-local)</h2>
+<ul>
+<li>Baseline API: <code>http://localhost:8081</code></li>
+<li>Candidate API: <code>http://localhost:8082</code></li>
+<li>Baseline health: <code>http://localhost:8081/healthz</code></li>
+<li>Candidate health: <code>http://localhost:8082/healthz</code></li>
+</ul>
+<p><em>Note: These are sandbox-local endpoints, not publicly reachable URLs. Genesis deploys static sites only.</em></p>
+</div>
+
+<div class="card">
+<h2>Source Commits</h2>
+<ul>
+<li>Baseline: <code>70b7e689486b744f58911993f88d268c1e822aed</code> on <code>main</code></li>
+<li>Candidate: <code>f6e65d2101340dbc27421c7d754cbaf64aff371b</code> in detached worktree <code>/tmp/candidate-worktree</code> (2 commits on top of baseline)</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>Workload Definition</h2>
+<ul>
+<li>2000 pricing requests per round</li>
+<li>8 concurrent workers</li>
+<li>3 rounds per profile</li>
+<li>Profiles: large (10000 products, 5000 promotions), medium (1000 products, 500 promotions), small (100 products, 50 promotions)</li>
+<li>Backend: in-memory store (production uses PostgreSQL — not evaluated)</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>User Verification Steps</h2>
+<ol>
+<li>Open the <a href="dashboard/index.html">comparison dashboard</a> for the full before/after numbers.</li>
+<li>Open the <a href="test-report/index.html">test report</a> to confirm all gates pass.</li>
+<li>Open the <a href="db-evidence/index.html">database query evidence</a> to see the query-count reduction.</li>
+<li>Open the <a href="logs/index.html">logs</a> to inspect raw benchmark output.</li>
+<li>To reproduce locally: <code>go build -o /tmp/perfbench ./cmd/perfbench && /tmp/perfbench -profile large -n 2000 -c 8 -rounds 3</code></li>
+</ol>
+</div>
+
+<div class="card">
+<h2>Remaining Risks</h2>
+<ul>
+<li><strong>PostgreSQL not evaluated:</strong> The in-memory benchmark shows a p95 regression on the large profile. The candidate's 72× query reduction should improve production latency, but this has not been measured.</li>
+<li><strong>6-hour memory soak not run:</strong> The reported memory growth (1.4GB → 4.5GB over 6h) was not reproduced or validated.</li>
+<li><strong>Production p95 not confirmed:</strong> The reported 1.8s p95 was not reproduced in the in-memory benchmark.</li>
+<li><strong>F7 not addressed:</strong> Candidate selection still scans all tenant promotions. Requires PostgreSQL mode and migration changes.</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>Rollback Procedure</h2>
+<pre>git checkout main
+git branch -D perf/candidate-a-combined-remediation 2>/dev/null || true
+# This restores the repository to exactly commit 70b7e68 on main.</pre>
+</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,3 @@
+2026/10/24 06:26:54 api listening on :8081
+{"latency_ms":0,"level":"info","method":"GET","msg":"http_request","request_id":"7a7d5867-1eb6-4603-a4a5-16c809c8a17e","route":"/healthz","status":200,"ts":"2026-10-24T06:26:56.274839766Z"}
+{"latency_ms":0,"level":"info","method":"GET","msg":"http_request","request_id":"6640b81f-dddc-4a45-9327-d791b54a6844","route":"/version","status":200,"ts":"2026-10-24T06:26:56.296340421Z"}

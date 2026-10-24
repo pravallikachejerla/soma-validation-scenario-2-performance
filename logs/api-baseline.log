@@ -1,0 +1,4 @@
+2026/10/24 06:32:27 api listening on :8081
+{"latency_ms":0,"level":"info","method":"GET","msg":"http_request","request_id":"ec588c8d-0426-493b-8cca-dda2cb0dede8","route":"/healthz","status":200,"ts":"2026-10-24T06:32:29.618227641Z"}
+{"latency_ms":0,"level":"info","method":"POST","msg":"http_request","request_id":"f5111a58-faf6-4c7a-908c-1787a00d5e58","route":"/api/v1/admin/seed","status":200,"ts":"2026-10-24T06:32:29.632887348Z"}
+{"body":{"customer_id":"","discount_reason":"","negotiated_price":0},"latency_ms":0,"level":"info","method":"POST","msg":"http_request","request_id":"b624014e-c00a-4c9f-8d23-e8924aa2433b","route":"/api/v1/pricing/quote","status":200,"ts":"2026-10-24T06:32:29.648672854Z"}

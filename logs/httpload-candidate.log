@@ -1,0 +1,3 @@
+=== HTTP load: candidate (http://localhost:8082) n=500 c=8 ===
+elapsed_ms=5286 count=500
+p50_s=0.016738 p95_s=0.033684 p99_s=0.040059 rps=95
