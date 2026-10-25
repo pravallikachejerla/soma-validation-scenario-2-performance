@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -64,6 +65,51 @@ func (s *Server) routes() {
 		r.Get("/admin/audit", s.handleAudit)
 		r.Post("/admin/seed", s.handleSeed)
 	})
+
+	// Serve the built frontend (Vite output) at / with SPA fallback.
+	s.mux.Handle("/*", s.handleFrontend())
+}
+
+// handleFrontend serves the built frontend assets. It serves files
+// from frontend/dist/ and falls back to index.html for SPA routes.
+func (s *Server) handleFrontend() http.Handler {
+	distDir := findFrontendDist()
+	if distDir == "" {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.NotFound(w, r)
+		})
+	}
+	fileServer := http.FileServer(http.Dir(distDir))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := filepath.Join(distDir, r.URL.Path)
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+		// SPA fallback: serve index.html for non-asset paths.
+		if strings.HasPrefix(r.URL.Path, "/assets/") {
+			http.NotFound(w, r)
+			return
+		}
+		indexPath := filepath.Join(distDir, "index.html")
+		http.ServeFile(w, r, indexPath)
+	})
+}
+
+// findFrontendDist locates the built frontend directory.
+func findFrontendDist() string {
+	candidates := []string{
+		"frontend/dist",
+		"../frontend/dist",
+		"../../frontend/dist",
+	}
+	for _, c := range candidates {
+		if _, err := os.Stat(filepath.Join(c, "index.html")); err == nil {
+			abs, _ := filepath.Abs(c)
+			return abs
+		}
+	}
+	return ""
 }
 
 // requestID middleware attaches a request id to the context.

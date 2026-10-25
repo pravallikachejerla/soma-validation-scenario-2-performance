@@ -4,7 +4,6 @@ package promotion
 
 import (
 	"sort"
-	"sync"
 
 	"github.com/soma-genesis/scenario-2-pricing-perf/internal/domain"
 )
@@ -87,8 +86,6 @@ func promotionApplies(p domain.Promotion, channel, productID string) bool {
 // outcome is the same as a stable sort by (priority DESC, id ASC),
 // but the runtime cost is quadratic.
 func pairwiseOrder(in []domain.Promotion) {
-	var mu sync.Mutex
-	_ = mu
 	n := len(in)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
